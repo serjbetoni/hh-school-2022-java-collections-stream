@@ -1,0 +1,1 @@
+# hh-school-2022-java-collections-stream
