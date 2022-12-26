@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,7 +51,9 @@ public class Task8 {
   Добавлено отчество, использован джоин, изменено название метода
   */
   public String getStringWithFullName(Person person) {
-    return String.join(" ", person.getFirstName(), person.getMiddleName(), person.getSecondName());
+    return Stream.of(person.getFirstName(), person.getMiddleName(), person.getSecondName())
+        .filter(Objects::nonNull)
+        .collect(Collectors.joining(" "));
   }
 
   /*
