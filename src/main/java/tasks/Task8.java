@@ -1,11 +1,12 @@
 package tasks;
 
 import common.Person;
+
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,65 +24,66 @@ public class Task8 {
 
   private long count;
 
-  //Не хотим выдывать апи нашу фальшивую персону, поэтому конвертим начиная со второй
-  public List<String> getNames(List<Person> persons) {
-    if (persons.size() == 0) {
-      return Collections.emptyList();
-    }
-    persons.remove(0);
-    return persons.stream().map(Person::getFirstName).collect(Collectors.toList());
+  /*
+  Не хотим выдывать апи нашу фальшивую персону, поэтому конвертим начиная со второй
+  ________________________________________________________________________________
+  Удалена проверка размера списка и добавлен метод skip вместо удаления
+   */
+  public List<String> getRealNames(List<Person> persons) {
+    return persons.stream()
+        .skip(1)
+        .map(Person::getFirstName)
+        .toList();
   }
 
-  //ну и различные имена тоже хочется
-  public Set<String> getDifferentNames(List<Person> persons) {
-    return getNames(persons).stream().distinct().collect(Collectors.toSet());
+  /*
+  ну и различные имена тоже хочется
+  ________________________________________________________________________________
+  Возвращаем уникальное множество, изменено название метода
+  */
+  public Set<String> getUniquesNames(List<Person> persons) {
+    return new HashSet<>(getRealNames(persons));
   }
 
-  //Для фронтов выдадим полное имя, а то сами не могут
-  public String convertPersonToString(Person person) {
-    String result = "";
-    if (person.getSecondName() != null) {
-      result += person.getSecondName();
-    }
-
-    if (person.getFirstName() != null) {
-      result += " " + person.getFirstName();
-    }
-
-    if (person.getSecondName() != null) {
-      result += " " + person.getSecondName();
-    }
-    return result;
+  /*
+  Для фронтов выдадим полное имя, а то сами не могут
+  ________________________________________________________________________________
+  Добавлено отчество, использован джоин, изменено название метода
+  */
+  public String getStringWithFullName(Person person) {
+    return Stream.of(person.getFirstName(), person.getMiddleName(), person.getSecondName())
+        .filter(Objects::nonNull)
+        .collect(Collectors.joining(" "));
   }
 
-  // словарь id персоны -> ее имя
-  public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    Map<Integer, String> map = new HashMap<>(1);
-    for (Person person : persons) {
-      if (!map.containsKey(person.getId())) {
-        map.put(person.getId(), convertPersonToString(person));
-      }
-    }
-    return map;
+  /*
+  словарь id персоны -> ее имя
+  ________________________________________________________________________________
+  Использован стрим, изменено название метода
+  */
+  public Map<Integer, String> getPersonIdByNames(Collection<Person> persons) {
+    return persons.stream()
+        .collect(Collectors.toMap(Person::getId, Person::getFirstName, (person, person2) -> person));
   }
 
-  // есть ли совпадающие в двух коллекциях персоны?
-  public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    boolean has = false;
-    for (Person person1 : persons1) {
-      for (Person person2 : persons2) {
-        if (person1.equals(person2)) {
-          has = true;
-        }
-      }
-    }
-    return has;
+  /*
+  есть ли совпадающие в двух коллекциях персоны?
+  ________________________________________________________________________________
+  Использован стрим, изменено название метода
+  */
+  public boolean assertSamePersonsInCollections(Collection<Person> persons1, Collection<Person> persons2) {
+    return persons1.stream()
+        .anyMatch(new HashSet<>(persons2)::contains);
   }
 
-  //...
+  /*
+  ...
+  ________________________________________________________________________________
+  Использован стрим, метод для подсчета четных чисел
+  */
   public long countEven(Stream<Integer> numbers) {
-    count = 0;
-    numbers.filter(num -> num % 2 == 0).forEach(num -> count++);
-    return count;
+    return numbers
+        .filter(num -> num % 2 == 0)
+        .count();
   }
 }
